@@ -3,7 +3,7 @@
 </h1>
 
 <h4 align="center">
-  👋 Hackable console logger
+  👋 Hackable console logger for Node and Browser environments
 </h4>
 
 <div align="center">
@@ -16,46 +16,61 @@
   </a>
 </p>
 
+
+## Table of Contents
+
+* [Description](#description)
+* [Highlights](#highlights)
+* [Install](#install)
+* [Usage](#usage)
+  * [Default Loggers](#default-loggers)
+  * [Node](#node)
+  * [Browser](#browser)
+  * [Custom Loggers](#custom-loggers)
+  * [Scoped Loggers](#scoped-loggers)
+  * [Interactive Loggers](#interactive-loggers)
+  * [Writable Streams](#writable-streams)
+  * [Timers](#timers)
+* [Configuration](#configuration)
+  * [Global](#global)
+  * [Local](#local)
+* [API](#api)
+* [Development](#development)
+* [Related](#related)
+* [Contributors](#contributors)
+* [License](#license)
+
+
 ## Description
 
 Hackable and configurable to the core, signale can be used for logging purposes, status reporting, as well as for handling the output rendering process of other node modules and applications.
 
 Come over to [Gitter](https://gitter.im/klauscfhq/signale) or [Twitter](https://twitter.com/klauscfhq) to share your thoughts on the project.
 
+
 ## Highlights
 
-- 16 out-of-the-box loggers
-- Hackable to the core
-- Clean and beautiful output
-- Integrated timers
-- Custom pluggable loggers
-- Interactive and regular modes
-- Filename, date and timestamp support
-- Scoped loggers and timers
-- String interpolation support
-- Multiple configurable writable streams
-- Simple and minimal syntax
-- Globally configurable through `package.json`
-- Overridable configuration per file and logger
+* 16 out-of-the-box loggers
+* Hackable to the core
+* Clean and beautiful output
+* Integrated timers
+* Custom pluggable loggers
+* Interactive and regular modes
+* Filename, date and timestamp support
+* Scoped loggers and timers
+* String interpolation support
+* Multiple configurable writable streams
+* Simple and minimal syntax
+* Globally configurable through `package.json`
+* Overridable configuration per file and logger
 
-## Contents
-
-- [Description](#description)
-- [Highlights](#highlights)
-- [Install](#install)
-- [Usage](#usage)
-- [Configuration](#configuration)
-- [API](#api)
-- [Development](#development)
-- [Related](#related)
-- [Team](#team)
-- [License](#license)
 
 ## Install
 
 ```bash
 npm install signale
 ```
+
 
 ## Usage
 
@@ -68,26 +83,32 @@ Import signale and start using any of the default loggers.
 
 <br/>
 
-- `await`
-- `complete`
-- `error`
-- `debug`
-- `fatal`
-- `fav`
-- `info`
-- `note`
-- `pause`
-- `pending`
-- `star`
-- `start`
-- `success`
-- `warn`
-- `watch`
-- `log`
+* `await`
+* `complete`
+* `error`
+* `debug`
+* `fatal`
+* `fav`
+* `info`
+* `note`
+* `pause`
+* `pending`
+* `star`
+* `start`
+* `success`
+* `warn`
+* `watch`
+* `log`
 
 </details>
 
 <br/>
+
+<div align="center">
+  <img alt="Default Loggers" src="media/default-loggers.png" width="65%">
+</div>
+
+### Node
 
 ```js
 const signale = require('signale');
@@ -100,16 +121,35 @@ signale.watch('Recursively watching build directory...');
 signale.complete({prefix: '[task]', message: 'Fix issue #59', suffix: '(@klauscfhq)'});
 ```
 
-<div align="center">
-  <img alt="Default Loggers" src="media/default-loggers.png" width="65%">
-</div>
+### Browser
+
+#### VanillaJS
+
+```html
+<script src="https://unpkg.com/signale"></script>
+<script type="text/javascript">
+  (function() {
+    var signale = new Signale();
+    signale.success('Operation successful');
+    signale.debug('Hello', 'from', 'L59');
+    signale.pending('Write release notes for %s', '1.2.0');
+    signale.fatal(new Error('Unable to acquire lock'));
+    signale.watch('Recursively watching build directory...');
+    signale.complete({prefix: '[task]', message: 'Fix issue #59', suffix: '(@klauscfhq)'});
+  })();
+</script>
+```
+
+#### Bundler
+
+If you're using [browserify][], [webpack][], or [rollup][] you can use the package as you normally would with [Node](#node) above.
 
 ### Custom Loggers
 
 To create a custom logger define an `options` object yielding a `types` field with the logger data and pass it as argument to a new signale instance.
 
 ```js
-const {Signale} = require('signale');
+const Signale = require('signale');
 
 const options = {
   disabled: false,
@@ -142,7 +182,7 @@ custom.santa('Hoho! You have an unused variable on L45.');
 Here is an example where we override the default `error` and `success` loggers.
 
 ```js
-const {Signale} = require('signale');
+const Signale = require('signale');
 
 const options = {
   types: {
@@ -170,56 +210,56 @@ custom.success('Custom Success Log');
   <img alt="Default Loggers" src="media/override-defaults.png" width="65%">
 </div>
 
-The `options` object can hold any of the following attributes: `disabled`, `interactive`, `stream`, `scope` and `types`. 
+The `options` object can hold any of the following attributes: `disabled`, `interactive`, `stream`, `scope` and `types`.
 
 ##### `disabled`
 
-- Type: `Boolean`
-- Default: `false`
+* Type: `Boolean`
+* Default: `false`
 
 Disables the logging functionality of all loggers belonging to the created instance.
 
 ##### `interactive`
 
-- Type: `Boolean`
-- Default: `false`
+* Type: `Boolean`
+* Default: `false`
 
 Switches all loggers belonging to the created instance into the interactive mode.
 
 ##### `stream`
 
-- Type: `Writable stream` or `Array of Writable streams`
-- Default: `process.stdout`
+* Type: `Writable stream` or `Array of Writable streams`
+* Default: `process.stdout`
 
 Destination to which the data is written, can be a single valid [Writable stream](https://nodejs.org/api/stream.html#stream_writable_streams) or an array holding multiple valid Writable streams.
 
 ##### `scope`
 
-- Type: `String` or `Array of Strings`
+* Type: `String` or `Array of Strings`
 
 Name of the scope the logger is reporting from.
 
 ##### `types`
 
-- Type: `Object`
+* Type: `Object`
 
 Holds the configuration of the custom and default loggers.
 
 ##### `badge`
 
-- Type: `String`
+* Type: `String`
 
 The icon corresponding to the logger.
 
 ##### `label`
 
-- Type: `String`
+* Type: `String`
 
 The label used to identify the type of the logger.
 
 ##### `color`
 
-- Type: `String`
+* Type: `String`
 
 The color of the label, can be any of the foreground colors supported by [chalk](https://github.com/chalk/chalk#colors).
 
@@ -228,7 +268,7 @@ The color of the label, can be any of the foreground colors supported by [chalk]
 To create a scoped logger from scratch, define the `scope` field inside the `options` object and pass it as argument to a new signale instance.
 
 ```js
-const {Signale} = require('signale');
+const Signale = require('signale');
 
 const options = {
   scope: 'global scope'
@@ -253,9 +293,9 @@ global.success('Hello from the global scope');
 function foo() {
   const outer = global.scope('outer', 'scope');
   outer.success('Hello from the outer scope');
-  
+
   setTimeout(() => {
-    const inner = outer.scope('inner', 'scope'); 
+    const inner = outer.scope('inner', 'scope');
     inner.success('Hello from the inner scope');
   }, 500);
 }
@@ -272,7 +312,7 @@ foo();
 To initialize an interactive logger, create a new signale instance with the [`interactive`](#interactive) attribute set to `true`. While into the interactive mode, previously logged messages originating from an interactive logger, will be overridden only by new ones originating from the same or a different interactive logger. Note that regular messages originating from regular loggers are not overridden by the interactive ones.
 
 ```js
-const {Signale} = require('signale');
+const Signale = require('signale');
 
 const interactive = new Signale({interactive: true, scope: 'interactive'});
 
@@ -294,13 +334,12 @@ setTimeout(() => {
   <img alt="Interactive Mode" src="media/interactive-mode.gif" width="65%">
 </div>
 
-
 ### Writable Streams
 
 By default, all signale instances log their messages to the `process.stdout` stream. This can be modified, to match your own preference, through the [`stream`](#stream) property, where you can define a single or multiple valid Writable streams, which will be used by all logger types to log your data. Additionally, it is possible to define one or more Writable streams exclusively for a specific logger type, thus write data independently from the rest logger types.
 
 ```js
-const {Signale} = require('signale');
+const Signale = require('signale');
 
 const options = {
   stream: process.stderr, // All loggers will now write to `process.stderr`
@@ -343,6 +382,7 @@ setTimeout(() => {
   <img alt="Timers" src="media/timers.png" width="60%">
 </div>
 
+
 ## Configuration
 
 ### Global
@@ -375,85 +415,85 @@ The following illustrates all the available options with their respective defaul
 
 ##### `coloredInterpolation`
 
-- Type: `Boolean`
-- Default: `false`
+* Type: `Boolean`
+* Default: `false`
 
-Display the arguments, which replace the placeholder tokens on string interpolation, colored. 
+Display the arguments, which replace the placeholder tokens on string interpolation, colored.
 
 ##### `displayScope`
 
-- Type: `Boolean`
-- Default: `true`
+* Type: `Boolean`
+* Default: `true`
 
-Display the scope name of the logger. 
+Display the scope name of the logger.
 
 ##### `displayBadge`
 
-- Type: `Boolean`
-- Default: `true`
+* Type: `Boolean`
+* Default: `true`
 
 Display the badge of the logger.
 
 ##### `displayDate`
 
-- Type: `Boolean`
-- Default: `false`
+* Type: `Boolean`
+* Default: `false`
 
-Display the current local date in `YYYY-MM-DD` format. 
+Display the current local date in `YYYY-MM-DD` format.
 
 ##### `displayFilename`
 
-- Type: `Boolean`
-- Default: `false`
+* Type: `Boolean`
+* Default: `false`
 
 Display the name of the file that the logger is reporting from.
 
 ##### `displayLabel`
 
-- Type: `Boolean`
-- Default: `true`
+* Type: `Boolean`
+* Default: `true`
 
 Display the label of the logger.
 
 ##### `displayTimestamp`
 
-- Type: `Boolean`
-- Default: `false`
+* Type: `Boolean`
+* Default: `false`
 
 Display the current local time in `HH:MM:SS` format.
 
 ##### `underlineLabel`
 
-- Type: `Boolean`
-- Default: `true`
+* Type: `Boolean`
+* Default: `true`
 
 Underline the logger label.
 
 ##### `underlineMessage`
 
-- Type: `Boolean`
-- Default: `false`
+* Type: `Boolean`
+* Default: `false`
 
 Underline the logger message.
 
 ##### `underlinePrefix`
 
-- Type: `Boolean`
-- Default: `false`
+* Type: `Boolean`
+* Default: `false`
 
 Underline the logger prefix.
 
 ##### `underlineSuffix`
 
-- Type: `Boolean`
-- Default: `false`
+* Type: `Boolean`
+* Default: `false`
 
 Underline the logger suffix.
 
 ##### `uppercaseLabel`
 
-- Type: `Boolean`
-- Default: `false`
+* Type: `Boolean`
+* Default: `false`
 
 Display the label of the logger in uppercase.
 
@@ -474,7 +514,7 @@ signale.config({
   displayFilename: true,
   displayTimestamp: true,
   displayDate: false
-}); 
+});
 
 signale.success('Hello from the Global scope');
 ```
@@ -483,7 +523,7 @@ signale.success('Hello from the Global scope');
   <img alt="Local Config" src="media/local-config.png" width="65%">
 </div>
 
-Also, scoped loggers can have their own independent configuration, overriding the one inherited by the parent instance or `package.json`. 
+Also, scoped loggers can have their own independent configuration, overriding the one inherited by the parent instance or `package.json`.
 
 ```js
 // foo.js
@@ -518,19 +558,20 @@ foo();
   <img alt="Scope Config" src="media/scope-config.png" width="65%">
 </div>
 
+
 ## API
 
 #### signale.`<logger>(message[, message]|messageObj|errorObj)`
 
 ##### **`logger`**
 
-- Type: `Function`
+* Type: `Function`
 
 Can be any default or custom logger.
 
 ##### **`message`**
 
-- Type: `String`
+* Type: `String`
 
 Can be one or more comma delimited strings.
 
@@ -549,7 +590,7 @@ signale.success('Successful %s', 'operation');
 
 ##### **`errorObj`**
 
-- Type: `Error Object`
+* Type: `Error Object`
 
 Can be any error object.
 
@@ -565,7 +606,7 @@ signale.error(new Error('Unsuccessful operation'));
 
 ##### **`messageObj`**
 
-- Type: `Object`
+* Type: `Object`
 
 Can be an object holding the `prefix`, `message` and `suffix` attributes, with `prefix` and `suffix` always prepended and appended respectively to the logged `message`.
 
@@ -585,14 +626,14 @@ Defines the scope name of the logger.
 
 ##### **`name`**
 
-- Type: `String`
+* Type: `String`
 
 Can be one or more comma delimited strings.
 
 ```js
 const signale = require('signale');
 
-const foo = signale.scope('foo'); 
+const foo = signale.scope('foo');
 const fooBar = signale.scope('foo', 'bar');
 
 foo.success('foo');
@@ -609,7 +650,7 @@ Clears the scope name of the logger.
 ```js
 const signale = require('signale');
 
-const foo = signale.scope('foo'); 
+const foo = signale.scope('foo');
 
 foo.success('foo');
 //=> [foo] › ✔  success  foo
@@ -626,7 +667,7 @@ Sets the configuration of an instance overriding any existing global or local co
 
 ##### **`settingsObj`**
 
-- Type: `Object`
+* Type: `Object`
 
 Can hold any of the documented [options](#global).
 
@@ -646,15 +687,15 @@ signale.success('Successful operations');
 
 #### signale.`time([, label])`
 
-- Return Type: `String`
+* Return Type: `String`
 
 Sets a timers and accepts an optional label. If none provided the timer will receive a unique label automatically.
 
-Returns a string corresponding to the timer label. 
+Returns a string corresponding to the timer label.
 
 ##### **`label`**
 
-- Type: `String`
+* Type: `String`
 
 Label corresponding to the timer. Each timer must have its own unique label.
 
@@ -673,7 +714,7 @@ signale.time('label');
 
 #### signale.`timeEnd([, label])`
 
-- Return Type: `Object`
+* Return Type: `Object`
 
 Deactivates the timer to which the given label corresponds. If no label is provided the most recent timer, that was created without providing a label, will be deactivated.
 
@@ -681,7 +722,7 @@ Returns an object `{label, span}` holding the timer label and the total running 
 
 ##### **`label`**
 
-- Type: `String`
+* Type: `String`
 
 Label corresponding to the timer, each timer has its own unique label.
 
@@ -741,24 +782,40 @@ signale.success('foo');
 //=> ✔  success  foo
 ```
 
+
 ## Development
 
 For more info on how to contribute to the project, please read the [contributing guidelines](https://github.com/klauscfhq/signale/blob/master/contributing.md).
 
-- Fork the repository and clone it to your machine
-- Navigate to your local fork: `cd signale`
-- Install the project dependencies: `npm install` or `yarn install`
-- Lint code for errors: `npm test` or `yarn test`
+* Fork the repository and clone it to your machine
+* Navigate to your local fork: `cd signale`
+* Install the project dependencies: `npm install` or `yarn install`
+* Lint code for errors: `npm test` or `yarn test`
+
 
 ## Related
 
-- [chalk](https://github.com/chalk/chalk) - Terminal string styling done right
-- [figures](https://github.com/sindresorhus/figures) - Unicode symbols
+* [chalk](https://github.com/chalk/chalk) - Terminal string styling done right
+* [figures](https://github.com/sindresorhus/figures) - Unicode symbols
 
-## Team
 
-- Klaus Sinani [(@klauscfhq)](https://github.com/klauscfhq)
+## Contributors
+
+| Name             | Website                         |
+| ---------------- | ------------------------------- |
+| **Klaus Sinani** | <https://klauscfhq.github.com/> |
+| **Nick Baugh**   | <https://niftylettuce.com/>     |
+
 
 ## License
 
-[MIT](https://github.com/klauscfhq/signale/blob/master/license.md)
+[MIT](LICENSE) © [Klaus Sinani](https://klauscfhq.github.io)
+
+
+## 
+
+[browserify]: https://github.com/browserify/browserify
+
+[webpack]: https://github.com/webpack/webpack
+
+[rollup]: https://github.com/rollup/rollup

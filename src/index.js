@@ -1,11 +1,16 @@
-'use strict';
 const util = require('util');
 const path = require('path');
 const chalk = require('chalk');
 const figures = require('figures');
 const pkgConf = require('pkg-conf');
-const pkg = require('./package.json');
+const ansi = require('ansicolor');
+
+const pkg = require('../package.json');
 const defaultTypes = require('./types');
+
+// determine if we're in a browser
+const isBrowser =
+  typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
 let isPreviousLogInteractive = false;
 const defaults = pkg.options.default;
@@ -16,19 +21,21 @@ const arrayify = x => {
 };
 const now = () => Date.now();
 const timeSpan = then => {
-  return (now() - then);
+  return now() - then;
 };
 
 class Signale {
   constructor(options = {}) {
-    this._interactive = options.interactive || false;
+    this._interactive = isBrowser ? false : options.interactive || false;
     this._config = Object.assign(this.packageConfiguration, options.config);
     this._customTypes = Object.assign({}, options.types);
     this._disabled = options.disabled || false;
     this._scopeName = options.scope || '';
     this._timers = options.timers || new Map();
     this._types = this._mergeTypes(defaultTypes, this._customTypes);
-    this._stream = options.stream || process.stdout;
+    this._stream = isBrowser
+      ? { write: console.log }
+      : options.stream || process.stdout;
     this._longestLabel = defaultTypes.start.label.length;
 
     Object.keys(this._types).forEach(type => {
@@ -36,7 +43,10 @@ class Signale {
     });
 
     for (const type in this._types) {
-      if (this._types[type].label && this._types[type].label.length > this._longestLabel) {
+      if (
+        this._types[type].label &&
+        this._types[type].label.length > this._longestLabel
+      ) {
         this._longestLabel = this._types[type].label.length;
       }
     }
@@ -47,14 +57,17 @@ class Signale {
   }
 
   get currentOptions() {
-    return Object.assign({}, {
-      config: this._config,
-      disabled: this._disabled,
-      types: this._customTypes,
-      interactive: this._interactive,
-      timers: this._timers,
-      stream: this._stream
-    });
+    return Object.assign(
+      {},
+      {
+        config: this._config,
+        disabled: this._disabled,
+        types: this._customTypes,
+        interactive: this._interactive,
+        timers: this._timers,
+        stream: this._stream
+      }
+    );
   }
 
   get isEnabled() {
@@ -72,7 +85,7 @@ class Signale {
   get filename() {
     const _ = Error.prepareStackTrace;
     Error.prepareStackTrace = (error, stack) => stack;
-    const {stack} = new Error();
+    const { stack } = new Error();
     Error.prepareStackTrace = _;
 
     const callers = stack.map(x => x.getFileName());
@@ -81,11 +94,13 @@ class Signale {
       return x !== callers[0];
     });
 
-    return firstExternalFilePath ? path.basename(firstExternalFilePath) : 'anonymous';
+    return firstExternalFilePath
+      ? path.basename(firstExternalFilePath)
+      : 'anonymous';
   }
 
   get packageConfiguration() {
-    return pkgConf.sync(namespace, {defaults});
+    return pkgConf.sync(namespace, { defaults });
   }
 
   set configuration(configObj) {
@@ -136,7 +151,7 @@ class Signale {
         util.inspect.styles[x] = type.color || _[x];
       });
 
-      str = util.formatWithOptions({colors: true}, ...str);
+      str = util.formatWithOptions({ colors: true }, ...str);
       util.inspect.styles = Object.assign({}, _);
       return str;
     }
@@ -165,20 +180,22 @@ class Signale {
     return meta;
   }
 
-  _hasAdditional({suffix, prefix}, args, type) {
-    return (suffix || prefix) ? '' : this._formatMessage(args, type);
+  _hasAdditional({ suffix, prefix }, args, type) {
+    return suffix || prefix ? '' : this._formatMessage(args, type);
   }
 
   _buildSignale(type, ...args) {
     let [msg, additional] = [{}, {}];
 
-    if (args.length === 1 && typeof (args[0]) === 'object' && args[0] !== null) {
+    if (args.length === 1 && typeof args[0] === 'object' && args[0] !== null) {
       if (args[0] instanceof Error) {
         [msg] = args;
       } else {
-        const [{prefix, message, suffix}] = args;
-        additional = Object.assign({}, {suffix, prefix});
-        msg = message ? this._formatMessage(message, type) : this._hasAdditional(additional, args, type);
+        const [{ prefix, message, suffix }] = args;
+        additional = Object.assign({}, { suffix, prefix });
+        msg = message
+          ? this._formatMessage(message, type)
+          : this._hasAdditional(additional, args, type);
       }
     } else {
       msg = this._formatMessage(args, type);
@@ -199,9 +216,13 @@ class Signale {
     }
 
     if (this._config.displayLabel && type.label) {
-      const label = this._config.uppercaseLabel ? type.label.toUpperCase() : type.label;
+      const label = this._config.uppercaseLabel
+        ? type.label.toUpperCase()
+        : type.label;
       if (this._config.underlineLabel) {
-        signale.push(chalk[type.color].underline(label).padEnd(this._longestLabel + 20));
+        signale.push(
+          chalk[type.color].underline(label).padEnd(this._longestLabel + 20)
+        );
       } else {
         signale.push(chalk[type.color](label.padEnd(this._longestLabel + 1)));
       }
@@ -236,6 +257,11 @@ class Signale {
   }
 
   _write(stream, message) {
+    if (isBrowser) {
+      const parsed = ansi.parse(message);
+      stream.write(...parsed.asChromeConsoleLogArguments);
+      return;
+    }
     if (this._interactive && isPreviousLogInteractive) {
       stream.moveCursor(0, -1);
       stream.clearLine();
@@ -254,7 +280,10 @@ class Signale {
   }
 
   _logger(type, ...messageObj) {
-    this._log(this._buildSignale(this._types[type], ...messageObj), this._types[type].stream);
+    this._log(
+      this._buildSignale(this._types[type], ...messageObj),
+      this._types[type].stream
+    );
   }
 
   config(configObj) {
@@ -273,7 +302,7 @@ class Signale {
     if (name.length === 0) {
       throw new Error('No scope name was defined.');
     }
-    return new Signale(Object.assign(this.currentOptions, {scope: name}));
+    return new Signale(Object.assign(this.currentOptions, { scope: name }));
   }
 
   unscope() {
@@ -303,7 +332,7 @@ class Signale {
     if (!label && this._timers.size) {
       const is = x => x.includes('timer_');
       label = [...this._timers.keys()].reduceRight((x, y) => {
-        return is(x) ? x : (is(y) ? y : null);
+        return is(x) ? x : is(y) ? y : null;
       });
     }
     if (this._timers.has(label)) {
@@ -321,7 +350,7 @@ class Signale {
       message.push(...report);
 
       this._log(message.join(' '));
-      return {label, span};
+      return { label, span };
     }
   }
 }

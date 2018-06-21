@@ -1,4 +1,3 @@
-'use strict';
 const figures = require('figures');
 
 module.exports = {
