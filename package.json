@@ -1,4 +1,5 @@
 {
+  "name": "signale",
   "description": "👋 Hackable console logger for Node and Browser environments",
   "version": "1.2.1",
   "author": {
@@ -6,11 +7,11 @@
     "email": "klauscfhq@protonmail.com",
     "url": "https://klauscfhq.github.io"
   },
+  "browser": "dist/signale.js",
   "contributors": [
     "Klaus Sinani <klauscfhq@protonmail.com> (https://klauscfhq.github.com/)",
     "Nick Baugh <niftylettuce@gmail.com> (https://niftylettuce.com/)"
   ],
-  "browser": "dist/signale.js",
   "dependencies": {
     "ansi-html": "^0.0.7",
     "ansicolor": "^1.1.72",
